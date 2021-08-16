@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: voiceagent-api-deployment
+    labels:
+        app: voiceagent-api
+spec:
+  selector:
+    matchLabels:
+      app: voiceagent-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: voiceagent-api
+    spec:
+      containers:
+        - name: voiceagent-api
+          image: us.icr.io/nvoeztjvpdqabiegedjzfvfdqcdccm/voiceagent-api:latest
+          imagePullPolicy: Always
+          ports:
+              - containerPort: 8080
+          envFrom:
+          - secretRef:
+              name: voiceagentapi-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: voiceagent-api-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    nodePort: 31001
+  selector:
+    app: voiceagent-api
