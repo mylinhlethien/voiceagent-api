@@ -25,7 +25,7 @@ opts.api_key = process.env.KAFKAAPIKEY;
 // Red Hat: '/etc/pki/tls/cert.pem',
 // macOS: '/usr/local/etc/openssl/cert.pem' from openssl installed by brew
 //opts.calocation = '/usr/local/etc/openssl/cert.pem';
-opts.calocation = '/etc/ssl/certs';
+opts.calocation = '/etc/pki/tls/cert.pem';
 if (!fs.existsSync(opts.calocation)) {
     console.error('Error - Failed to access <cert_location> : ' + opts.calocation);
     process.exit(-1);
