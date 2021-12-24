@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: voiceagent-api
-          image: us.icr.io/nvoeztjvpdqabiegedjzfvfdqcdccm/voiceagent-api:latest
+          image: <REGISTRY>/<NAMESPACE>/voiceagent-api:latest
           imagePullPolicy: Always
           ports:
               - containerPort: 8080
@@ -38,3 +38,34 @@ spec:
     nodePort: 31001
   selector:
     app: voiceagent-api
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: restart-voiceagent-deployment
+  namespace: default
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: restart-voiceagent-deployment
+  namespace: default
+spec:
+  concurrencyPolicy: Forbid # Do not run concurrently!
+  schedule: '0 */2 * * *'     # Run every 2 hours
+  jobTemplate:
+    spec:
+      backoffLimit: 2 
+      activeDeadlineSeconds: 600 
+      template:
+        spec:
+          serviceAccountName: restart-voiceagent-deployment # Run under the service account created above
+          restartPolicy: Never
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl # Specify the kubectl image
+              command: # The kubectl command to execute
+                - 'kubectl'
+                - 'rollout'
+                - 'restart'
+                - 'deployment/voiceagent-api-deployment'

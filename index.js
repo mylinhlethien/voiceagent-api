@@ -21,7 +21,7 @@ var topic = 'watson-messages';
 opts.brokers = process.env.KAFKABROKERS;
 opts.api_key = process.env.KAFKAAPIKEY;
 
-// IBM Cloud/Ubuntu: '/etc/ssl/certs'
+//IBM Cloud/Ubuntu: '/etc/ssl/certs'
 // Red Hat: '/etc/pki/tls/cert.pem',
 // macOS: '/usr/local/etc/openssl/cert.pem' from openssl installed by brew
 //opts.calocation = '/usr/local/etc/openssl/cert.pem';
@@ -50,8 +50,8 @@ for (var key in driver_options) {
     admin_opts[key] = driver_options[key];
 }
 var consumer_opts = {
-    'client.id': 'kafka-nodejs-console-sample-consumer',
-    'group.id': 'kafka-nodejs-console-sample-group'
+    'client.id': 'kafka-nodejs-console-sample-consumer3',
+    'group.id': 'kafka-nodejs-console-sample-group3'
 };
 for (var key in driver_options) {
     consumer_opts[key] = driver_options[key];
@@ -181,44 +181,53 @@ consumer.on('data', function (data) {
     //messages consumed by Kafka
     var msg = data.value.toString();
     var obj = JSON.parse(msg);
-    console.log(obj.output.text);
-    console.log(obj.input.text);
+    //console.log(obj);
+    if (obj.output != undefined && obj.output.generic[0].response_type == "text" && obj.output.generic[0].text != "") {
+        console.log(obj.output.generic[0].text);
+        io.emit('chat-messages', obj);
+    }
+    else if (obj.output != undefined && obj.output.generic[0].response_type != "text") {
+        console.log(obj.output.generic[1].text);
+        io.emit('chat-messages', obj);
+    }
 
     /** CONVERSATION */
     //the conversation is sent to the React js front-end using Socket.io
-    io.emit('chat-messages', obj);
+    //io.emit('chat-messages', obj);
 
     /** ANALYSE SENTIMENTS NLU */
     //every message from the client are added in the variable "list_messages" in order to send it to NLU for sentiment analysis
-    if (obj.input.text != '') {
+    if (obj.input !== undefined && obj.input.text != '' && obj.input.text != 'vgwPostResponseTimeout') {
         list_messages = list_messages + ". " + obj.input.text;
+        io.emit('chat-messages', obj);
+        console.log(obj.input.text);
     }
 
     /** CLOUDANT CLIENT PROFILE */
     //we call our Cloudant database to get the document corresponding to the client
-    if (obj.entities[0] != undefined) {
+    if (obj.output != undefined && obj.output.entities[0] != undefined) {
         //we collect the client identification number in the variable "client"
-        if (obj.entities[0].entity == "sys-number") {
-            client.push(obj.entities[0].interpretation.numeric_value);
+        if (obj.output.entities[0].entity == "sys-number") {
+            client.push(obj.output.entities[0].interpretation.numeric_value);
         }
         /** CAPTER TYPE CONTRAT */
-        if (obj.entities[0].entity == 'type-contrat') {
-            io.emit('intent-resiliation', "Demande de résiliation - Contrat " + obj.entities[0].value);
+        if (obj.output.entities[0].entity == 'type-contrat') {
+            io.emit('intent-resiliation', "Demande de résiliation - Contrat " + obj.output.entities[0].value);
         }
 
         //We call the emotion analysis at the end of the conversation, when the client tells the reasons of resiliation
-        else if (obj.entities[0].entity == "raison-resiliation") {
+        else if (obj.output.entities[0].entity == "raison-resiliation") {
 
             //if "concurrence" entity is detected, we send it in the ODM input, otherwise we send the reason of resiliation in the ODM input
-            if (obj.entities[1] !== undefined && obj.entities[1].entity == "concurrence") {
+            if (obj.output.entities[1] !== undefined && obj.output.entities[1].entity == "concurrence") {
                 odmServiceInput.entite.entity = "concurrence";
-                odmServiceInput.entite.value = obj.entities[1].value;
-                io.emit('raison-resiliation', obj.entities[0].value + " - Concurrence : " + obj.entities[1].value);
+                odmServiceInput.entite.value = obj.output.entities[1].value;
+                io.emit('raison-resiliation', obj.output.entities[0].value + " - Concurrence : " + obj.output.entities[1].value);
             }
             else {
                 odmServiceInput.entite.entity = "raison-resiliation";
-                odmServiceInput.entite.value = obj.entities[0].value;
-                io.emit('raison-resiliation', obj.entities[0].value);
+                odmServiceInput.entite.value = obj.output.entities[0].value;
+                io.emit('raison-resiliation', obj.output.entities[0].value);
             }
 
             const translateParams = {
@@ -316,13 +325,13 @@ consumer.on('data', function (data) {
                 });
         }
         //if the client booked a RDV with the advisor at the end of the conversation, we display the last message in the recommandations window
-        else if (obj.entities[0].entity == "sys-time") {
-            last_message = obj.output.text
+        else if (obj.output.entities[0].entity == "sys-time") {
+            last_message = obj.output.generic[0].text
             io.emit("lastmessage", last_message);
         }
     }
 
-    if (obj.input.text == 'vgwHangUp' || obj.input.text == 'vgwCallTransferred') {
+    if (obj.input != undefined && (obj.input.text == 'caller_hangup')) {
         client = [];
         list_messages = "";
         last_message = "";
