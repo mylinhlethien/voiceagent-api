@@ -1,6 +1,6 @@
 # IBM Voicebot insurance advisor project: backend application
 
-This application is the backend application of the [Augmented call center project](https://github.com/My-Linh-Le-Thien/crm-webapp).
+This application is the backend application of the [Augmented call center project](https://github.com/My-Linh-Le-Thien/crm-webapp-demo).
 
 ---
 # Requirements
@@ -76,7 +76,7 @@ Update .env file with your credentials for each IBM Services (Event Streams, Clo
 The application should be running on port 8080.
 To try it, you can call your voicebot via your Twilio phone number and the conversation should display in the console.
 
-To run the frontend application/user interface, please refer to the [React-socket application](https://github.com/My-Linh-Le-Thien/react-socket).
+To run the frontend application/user interface, please refer to the [React-socket application](https://github.com/My-Linh-Le-Thien/react-socket-demo).
 
 ---
 ## IBM Cloud Kubernetes deployment
@@ -157,4 +157,4 @@ kubectl logs <POD-ID>
 2. Identify the Node Port using `kubectl describe service voiceagent-api-service`
 3. Access your application at `http://<WORKER-PUBLIC-IP>:<NODE-PORT>/`
 
-Copy the address of this application since you will need it for [the frontend application](https://github.com/My-Linh-Le-Thien/react-socket).
+Copy the address of this application since you will need it for [the frontend application](https://github.com/My-Linh-Le-Thien/react-socket-demo).
