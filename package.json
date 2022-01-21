@@ -10,13 +10,14 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@cloudant/cloudant": "^4.3.0",
+        "@ibm-cloud/cloudant": "^0.0.23",
         "axios": "^0.21.1",
         "express": "^4.17.1",
-        "ibm-cloud-sdk-core": "^2.11.3",
-        "ibm-watson": "^5.7.1",
+        "ibm-cloud-sdk-core": "^2.17.6",
+        "ibm-watson": "^6.2.1",
         "node-rdkafka": "^2.9.1",
         "nodemon": "^2.0.2",
-        "socketio": "^1.0.0"
+        "socketio": "^1.0.0",
+        "tough-cookie": "^4.0.0"
     }
 }
